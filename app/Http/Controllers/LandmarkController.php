@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Landmark;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class LandmarkController extends Controller
 {
@@ -36,15 +37,35 @@ class LandmarkController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(),[
             'name' =>'required|string|unique:landmarks',
             'local_govts_id' =>'required|integer',
             'details'=>'required|string',
 
         ]);
 
-        return Landmark::create($request->all(),[
-        ]);
+        if($validator->fails()){
+            return[
+                'message'=> 'Failed to Save',
+                'error(s)' => $validator->errors(),
+            ];
+        }else{
+
+            $landmark = new Landmark;
+
+            $landmark->name = $request->name;
+            $landmark->local_govts_id = $request->local_govts_id;
+            $landmark->details = $request->details;
+            $landmark->save();
+
+            return [
+                'message' => 'New Landmark Saved',
+                'landmarks' => $landmark,
+            ];
+
+        }
+
+
     }
 
     /**
@@ -78,9 +99,34 @@ class LandmarkController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $landmark = Landmark::find($id);
-        $landmark->update($request->all());
-        return $landmark;
+        $validator = Validator::make($request->all(),[
+            'name' => 'required|string|unique:landmarks',
+            'local_govts_id' =>'integer|required',
+            'details'=> 'string|required'
+        ]);
+
+        if($validator->fails()){
+            return [
+                'message' => 'Failed to Update',
+                'error(s)' => $validator->errors(),
+            ];
+        }
+        else{
+
+
+            $landmark = Landmark::find($id);
+
+            $landmark->name = $request->name;
+            $landmark->local_govts_id = $request->local_govts_id;
+            $landmark->details = $request->details;
+
+
+            $landmark->save();
+             return [
+                 'message' =>'Landmark Updated',
+                 'landmark' => $landmark,
+             ];
+        }
     }
 
     /**

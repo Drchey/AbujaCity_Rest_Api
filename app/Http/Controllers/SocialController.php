@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Social;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SocialController extends Controller
 {
@@ -36,13 +37,28 @@ class SocialController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(),[
             'name' =>'required|string|unique:socials',
-
         ]);
 
-        return Social::create($request->all(),[
-        ]);
+        if($validator->fails()){
+            return[
+                'message'=> 'Failed to Save',
+                'error(s)' => $validator->errors(),
+            ];
+        }else{
+
+            $social = new Social;
+
+            $social->name = $request->name;
+            $social->save();
+
+            return [
+                'message' => 'New Social Function Saved',
+                'social' => $social,
+            ];
+
+        }
     }
 
     /**
@@ -76,9 +92,28 @@ class SocialController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $social = Social::find($id);
-        $social->update($request->all());
-        return $social;
+        $validator = Validator::make($request->all(),[
+            'name' =>'required|string|unique:socials',
+        ]);
+
+        if($validator->fails()){
+            return[
+                'message'=> 'Failed to Update',
+                'error(s)' => $validator->errors(),
+            ];
+        }else{
+
+            $social = Social::find($id);
+
+            $social->name = $request->name;
+            $social->save();
+
+            return [
+                'message' => 'Social Function Updated',
+                'social' => $social,
+            ];
+
+        }
     }
 
     /**

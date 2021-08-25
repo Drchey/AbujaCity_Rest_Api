@@ -12,7 +12,7 @@ class LocalGovt extends Model
     protected $table = 'local_govts';
 
     protected $fillable = [
-        'name', 'head', 'description',
+        'name', 'head', 'description', 'population',
     ];
 
     public function estates()

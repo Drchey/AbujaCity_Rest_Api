@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LocalGovt;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class LgaController extends Controller
 {
@@ -35,16 +36,32 @@ class LgaController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' =>'required|unique:local_govts',
-            'head' => 'required',
-            'description' =>'required',
-
+        $validator = Validator::make($request->all(),[
+            'name' =>'required|string|unique:local_govts',
+            'head' =>'required|string',
+            'description' => 'required|string',
         ]);
 
-        return LocalGovt::create($request->all(),[
+        if($validator->fails()){
+            return[
+                'message'=> 'Failed to Save',
+                'error(s)' => $validator->errors(),
+            ];
+        }else{
 
-        ]);
+            $lga = new LocalGovt;
+
+            $lga->name = $request->name;
+            $lga->head = $request->head;
+            $lga->description = $request->description;
+            $lga->save();
+
+            return [
+                'message' => 'New Local Goverment Saved',
+                'lga' => $lga,
+            ];
+
+        }
     }
 
     /**
@@ -79,9 +96,33 @@ class LgaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $lga = LocalGovt::find($id);
-        $lga->update($request->all());
-        return $lga;
+        $validator = Validator::make($request->all(),[
+            'name' =>'required|string|unique:local_govts',
+            'head' =>'required|string',
+            'population'=>'integer',
+            'description' => 'required|string',
+        ]);
+
+        if($validator->fails()){
+            return[
+                'message'=> 'Failed to Update',
+                'error(s)' => $validator->errors(),
+            ];
+        }else{
+
+            $lga = LocalGovt::find($id);
+
+            $lga->name = $request->name;
+            $lga->head = $request->head;
+            $lga->description = $request->description;
+            $lga->save();
+
+            return [
+                'message' => 'Local Goverment Updated',
+                'lga' => $lga,
+            ];
+
+        }
     }
 
     /**

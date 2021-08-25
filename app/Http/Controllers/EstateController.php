@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Estate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class EstateController extends Controller
 {
@@ -35,14 +36,32 @@ class EstateController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(),[
             'name' =>'required|string|unique:estates',
-            'local_govts_id' => 'required|integer',
-
+            'local_govts_id' =>'required|integer',
         ]);
 
-        return Estate::create($request->all(),[
-        ]);
+        if($validator->fails()){
+            return[
+                'message'=> 'Failed to Update',
+                'error(s)' => $validator->errors(),
+            ];
+        }else{
+
+            $estate = new Estate;
+
+            $estate->name = $request->name;
+            $estate->local_govts_id = $request->local_govts_id;
+            $estate->save();
+
+            return [
+                'message' => 'Estate Updated',
+                'estate' => $estate,
+            ];
+
+        }
+
+
     }
 
     /**
@@ -77,9 +96,32 @@ class EstateController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $estate = Estate::find($id);
-        $estate->update($request->all());
-        return $estate;
+        $validator = Validator::make($request->all(),[
+            'name' => 'required|string|unique:estates',
+            'local_govts_id' =>'integer|required',
+        ]);
+
+        if($validator->fails()){
+            return [
+                'message' => 'Failed to Update',
+                'error(s)' => $validator->errors(),
+            ];
+        }
+        else{
+
+
+            $estate = Estate::find($id);
+
+            $estate->name = $request->name;
+            $estate->local_govts_id = $request->local_govts_id;
+
+
+            $estate->save();
+             return [
+                 'message' =>'Updated',
+                 'estate' => $estate,
+             ];
+        }
     }
 
     /**

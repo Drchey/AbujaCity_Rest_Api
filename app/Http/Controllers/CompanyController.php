@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class CompanyController extends Controller
 {
@@ -36,16 +37,32 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(),[
             'name' =>'required|string|unique:companies',
-            'social_id'=>'required|integer',
-            'local_govts_id' => 'required|integer',
-            'description'=>'string',
-
+            'local_govts_id' =>'required|integer',
+            'description' => 'required|string',
         ]);
 
-        return Company::create($request->all(),[
-        ]);
+        if($validator->fails()){
+            return[
+                'message'=> 'Failed to Save',
+                'error(s)' => $validator->errors(),
+            ];
+        }else{
+
+            $company = new Company;
+
+            $company->name = $request->name;
+            $company->local_govts_id = $request->local_govts_id;
+            $company->description = $request->description;
+            $company->save();
+
+            return [
+                'message' => 'New Company Saved',
+                'company' => $company,
+            ];
+
+        }
     }
 
     /**
@@ -79,9 +96,32 @@ class CompanyController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $company = Company::find($id);
-        $company->update($request->all());
-        return $company;
+        $validator = Validator::make($request->all(),[
+            'name' =>'required|string|unique:companies',
+            'local_govts_id' =>'required|integer',
+            'description' => 'required|string',
+        ]);
+
+        if($validator->fails()){
+            return[
+                'message'=> 'Failed to Update',
+                'error(s)' => $validator->errors(),
+            ];
+        }else{
+
+            $company = Company::find($id);
+
+            $company->name = $request->name;
+            $company->local_govts_id = $request->local_govts_id;
+            $company->description = $request->description;
+            $company->save();
+
+            return [
+                'message' => 'Company Updated',
+                'company' => $company,
+            ];
+
+        }
     }
 
     /**

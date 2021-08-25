@@ -17,6 +17,7 @@ class CreateLocalGovtsTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('head');
+            $table->integer('population')->nullable();
             $table->string('description');
             $table->timestamps();
         });
